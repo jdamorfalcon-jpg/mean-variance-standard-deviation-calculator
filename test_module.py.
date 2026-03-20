@@ -1,0 +1,52 @@
+# sea_level_predictor.py
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import linregress
+
+
+def draw_plot():
+    # 1. Leer datos directamente desde la web
+    url = "https://raw.githubusercontent.com/freeCodeCamp/boilerplate-sea-level-predictor/master/epa-sea-level.csv"
+    df = pd.read_csv(url)
+
+    # 2. Crear figura
+    fig, ax = plt.subplots()
+
+    # 3. Scatter plot con datos reales
+    ax.scatter(df["Year"], df["CSIRO Adjusted Sea Level"], label="Data")
+
+    # 4. Regresión con todos los datos
+    slope, intercept, r_value, p_value, std_err = linregress(
+        df["Year"], df["CSIRO Adjusted Sea Level"]
+    )
+
+    years_full = pd.Series(range(df["Year"].min(), 2051))
+    sea_level_full = slope * years_full + intercept
+
+    ax.plot(years_full, sea_level_full, "r", label="Best fit (all data)")
+
+    # 5. Regresión solo desde 2000
+    df_recent = df[df["Year"] >= 2000]
+
+    slope2, intercept2, r2, p2, se2 = linregress(
+        df_recent["Year"], df_recent["CSIRO Adjusted Sea Level"]
+    )
+
+    years_recent = pd.Series(range(2000, 2051))
+    sea_level_recent = slope2 * years_recent + intercept2
+
+    ax.plot(years_recent, sea_level_recent, "g", label="Best fit (2000+)")
+
+    # 6. Etiquetas
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Sea Level (inches)")
+    ax.set_title("Rise in Sea Level")
+
+    # 7. Guardar imagen
+    plt.savefig("sea_level_plot.png")
+
+    return fig
+
+draw_plot()
+plt.show()
